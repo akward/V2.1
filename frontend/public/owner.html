@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard - E-Commerce Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/src/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h5><i class="bi bi-shop"></i> E-Commerce</h5>
+                <span class="badge bg-primary">Owner</span>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div>
+                    <h6 id="userName">Owner</h6>
+                    <small id="userEmail">email@example.com</small>
+                </div>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" data-section="dashboard" href="#">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-section="revenue" href="#">
+                        <i class="bi bi-graph-up"></i> Revenue
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-section="seller-commissions" href="#">
+                        <i class="bi bi-people"></i> Commissions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-section="warehouse" href="#">
+                        <i class="bi bi-box-seam"></i> Warehouse
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-section="add-admin" href="#">
+                        <i class="bi bi-person-plus"></i> Add Admin
+                    </a>
+                </li>
+                <li class="nav-item mt-3">
+                    <a class="nav-link text-danger" href="#" onclick="logout()">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="section-content">
+                <div class="section-header">
+                    <h2><i class="bi bi-speedometer2"></i> Dashboard</h2>
+                    <p>Ringkasan performa bisnis Anda</p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-primary">
+                            <i class="bi bi-currency-dollar"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalRevenue">Rp 0</h3>
+                            <p>Total Revenue</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-success">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalSellers">0</h3>
+                            <p>Total Sellers</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-warning">
+                            <i class="bi bi-box"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalProducts">0</h3>
+                            <p>Total Products</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-info">
+                            <i class="bi bi-trophy"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalCommissions">Rp 0</h3>
+                            <p>Total Commissions</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Revenue Chart</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="revenueChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Recent Sales</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="recentSalesList" class="recent-sales">
+                                    <p class="text-muted">No recent sales</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Revenue Section -->
+            <section id="revenue-section" class="section-content" style="display:none;">
+                <div class="section-header">
+                    <h2><i class="bi bi-graph-up"></i> Monthly Revenue</h2>
+                    <p>Lihat pendapatan per bulan</p>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">Bulan</label>
+                                <select id="monthSelect" class="form-select">
+                                    <option value="1">January</option>
+                                    <option value="2">February</option>
+                                    <option value="3">March</option>
+                                    <option value="4">April</option>
+                                    <option value="5">May</option>
+                                    <option value="6">June</option>
+                                    <option value="7">July</option>
+                                    <option value="8">August</option>
+                                    <option value="9">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Tahun</label>
+                                <select id="yearSelect" class="form-select"></select>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button class="btn btn-primary w-100" onclick="loadRevenue()">
+                                    <i class="bi bi-eye"></i> Lihat Revenue
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <h4>Total Revenue: <span id="revenueDisplay" class="text-success">Rp 0</span></h4>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Commissions Section -->
+            <section id="seller-commissions-section" class="section-content" style="display:none;">
+                <div class="section-header">
+                    <h2><i class="bi bi-people"></i> Seller Commissions</h2>
+                    <p>Komisi 10% dari setiap penjualan seller</p>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="commissionTable">
+                                <thead>
+                                    <tr>
+                                        <th>Seller</th>
+                                        <th>Commission</th>
+                                        <th>Month</th>
+                                        <th>Year</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="commissionBody">
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Warehouse Section -->
+            <section id="warehouse-section" class="section-content" style="display:none;">
+                <div class="section-header">
+                    <h2><i class="bi bi-box-seam"></i> Warehouse Inventory</h2>
+                    <p>Rincian produk yang tersisa di gudang</p>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="warehouseTable">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Price</th>
+                                        <th>Stock</th>
+                                        <th>Total Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="warehouseBody">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Add Admin Section -->
+            <section id="add-admin-section" class="section-content" style="display:none;">
+                <div class="section-header">
+                    <h2><i class="bi bi-person-plus"></i> Add New Admin</h2>
+                    <p>Tambah admin baru untuk membantu mengelola sistem</p>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <form id="addAdminForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Nama Lengkap</label>
+                                    <input type="text" class="form-control" id="adminName" placeholder="Nama Admin" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="adminEmail" placeholder="admin@email.com" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="adminPassword" placeholder="Minimal 6 karakter" required minlength="6">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Konfirmasi Password</label>
+                                    <input type="password" class="form-control" id="adminPasswordConfirm" placeholder="Konfirmasi password" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-person-plus"></i> Tambah Admin
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/src/js/api.js"></script>
+    <script src="/src/js/auth.js"></script>
+    <script src="/src/js/owner.js"></script>
+</body>
+</html>

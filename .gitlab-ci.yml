@@ -1,0 +1,54 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  NODE_VERSION: "18"
+
+cache:
+  paths:
+    - backend/node_modules/
+    - frontend/node_modules/
+
+# Build Backend
+build-backend:
+  stage: build
+  image: node:${NODE_VERSION}
+  script:
+    - cd backend
+    - npm ci
+    - npm run build || echo "No build script"
+  artifacts:
+    paths:
+      - backend/
+    expire_in: 1 hour
+  only:
+    - main
+
+# Build Frontend
+build-frontend:
+  stage: build
+  image: node:${NODE_VERSION}
+  script:
+    - cd frontend
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - frontend/public/
+    expire_in: 1 hour
+  only:
+    - main
+
+# Deploy to Production (Example with Railway/Render)
+deploy:
+  stage: deploy
+  image: node:${NODE_VERSION}
+  script:
+    - echo "Deploying application..."
+    - cd backend
+    - npm ci --production
+    - npm start
+  only:
+    - main
+  when: manual

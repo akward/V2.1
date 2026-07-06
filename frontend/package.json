@@ -1,0 +1,9 @@
+{
+  "name": "ecommerce-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for E-Commerce Web App",
+  "scripts": {
+    "build": "cp -r src/* public/",
+    "serve": "npx serve public"
+  }
+}
