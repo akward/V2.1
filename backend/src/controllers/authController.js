@@ -8,7 +8,7 @@ const login = async (req, res) => {
         console.log('=================================');
         console.log('🔐 LOGIN ATTEMPT');
         console.log('Email:', email);
-        console.log('Password provided:', password ? 'Yes' : 'No');
+        console.log('Password:', password);
         console.log('=================================');
 
         if (!email || !password) {
@@ -18,49 +18,46 @@ const login = async (req, res) => {
             });
         }
 
-        // === METHOD 1: Direct Query ke Supabase ===
-        console.log('📊 Method 1: Direct query to Supabase');
+        // === METHOD 1: Query dengan filter (tanpa .single()) ===
+        console.log('📊 Method 1: Query dengan filter');
+        const { data: users, error: queryError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', email);
+
+        console.log('📊 Query result:', {
+            dataLength: users?.length || 0,
+            error: queryError?.message || 'No error',
+            data: users ? users.map(u => ({
+                id: u.id,
+                email: u.email,
+                name: u.name,
+                role: u.role,
+                password_hash: u.password_hash
+            })) : []
+        });
+
         let user = null;
-        let error = null;
-        
-        try {
-            // Coba query langsung dengan filter
-            const { data, error: queryError } = await supabase
+
+        if (users && users.length > 0) {
+            user = users[0];
+            console.log('✅ User found with filter query');
+        } else {
+            console.log('❌ No user found with filter query');
+            
+            // === METHOD 2: Coba dengan .single() ===
+            console.log('📊 Method 2: Query dengan .single()');
+            const { data: singleUser, error: singleError } = await supabase
                 .from('users')
                 .select('*')
-                .eq('email', email);
+                .eq('email', email)
+                .single();
             
-            console.log('📊 Query result:', {
-                dataLength: data?.length || 0,
-                error: queryError?.message || 'No error'
-            });
-
-            if (data && data.length > 0) {
-                user = data[0];
-                console.log('✅ User found with direct query');
+            if (!singleError && singleUser) {
+                user = singleUser;
+                console.log('✅ User found with .single()');
             } else {
-                console.log('❌ No user found with direct query');
-            }
-        } catch (queryErr) {
-            console.error('❌ Direct query error:', queryErr.message);
-        }
-
-        // === METHOD 2: Fallback ke .single() ===
-        if (!user) {
-            console.log('📊 Method 2: Fallback to .single()');
-            try {
-                const { data, error: singleError } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('email', email)
-                    .single();
-                
-                if (!singleError && data) {
-                    user = data;
-                    console.log('✅ User found with .single()');
-                }
-            } catch (singleErr) {
-                console.error('❌ .single() error:', singleErr.message);
+                console.log('❌ .single() error:', singleError?.message);
             }
         }
 
@@ -68,7 +65,7 @@ const login = async (req, res) => {
         if (!user && email === 'owner@example.com' && password === 'owner123') {
             console.log('⚠️ USING BYPASS FOR TESTING');
             user = {
-                id: 'test-id-' + Date.now(),
+                id: 'bypass-id-' + Date.now(),
                 email: 'owner@example.com',
                 password_hash: 'owner123',
                 role: 'owner',
@@ -76,7 +73,6 @@ const login = async (req, res) => {
             };
         }
 
-        // Jika masih tidak ditemukan
         if (!user) {
             console.log('❌ User not found in database');
             return res.status(401).json({
@@ -89,6 +85,7 @@ const login = async (req, res) => {
         console.log('🔑 Comparing passwords:');
         console.log('Database hash:', user.password_hash);
         console.log('Input password:', password);
+        console.log('Match:', user.password_hash === password ? '✅ YES' : '❌ NO');
         
         if (user.password_hash !== password) {
             console.log('❌ Password mismatch!');
@@ -108,7 +105,7 @@ const login = async (req, res) => {
                 role: user.role,
                 name: user.name
             },
-            process.env.JWT_SECRET || 'fallback-secret-key-change-this-in-production',
+            process.env.JWT_SECRET || 'fallback-secret-key',
             { expiresIn: '7d' }
         );
 
