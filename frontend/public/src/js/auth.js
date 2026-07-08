@@ -1,4 +1,4 @@
-// Handle login
+// ===== Login Handler =====
 document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -15,13 +15,17 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     loginSpinner.style.display = 'inline-block';
     
     try {
+        // Pastikan window.api sudah terdefinisi
+        if (!window.api || !window.api.auth) {
+            throw new Error('API not loaded. Please refresh the page.');
+        }
+
         const result = await window.api.auth.login(email, password);
         
         if (result.success) {
             localStorage.setItem('token', result.token);
             localStorage.setItem('user', JSON.stringify(result.user));
             
-            // Redirect based on role
             const role = result.user.role;
             if (role === 'owner') {
                 window.location.href = '/owner.html';
@@ -35,6 +39,7 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
             alert.style.display = 'block';
         }
     } catch (error) {
+        console.error('Login error:', error);
         alert.textContent = 'Error: ' + error.message;
         alert.style.display = 'block';
     } finally {
@@ -44,14 +49,14 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     }
 });
 
-// Logout function
+// ===== Logout =====
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     window.location.href = '/login.html';
 }
 
-// Check if user is logged in
+// ===== Check Auth =====
 function checkAuth() {
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -64,7 +69,7 @@ function checkAuth() {
     return user;
 }
 
-// Load user info
+// ===== Load User Info =====
 function loadUserInfo() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const userNameEl = document.getElementById('userName');
