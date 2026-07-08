@@ -131,11 +131,18 @@ const commissionAPI = {
     getCommissions(sellerId, month, year) {
         let url = '/commissions';
         const params = new URLSearchParams();
-        if (sellerId) params.append('sellerId', sellerId);
+        
+        // Hanya kirim sellerId jika ada dan user adalah owner
+        // Tapi biarkan server yang menentukan berdasarkan role
+        if (sellerId) {
+            params.append('sellerId', sellerId);
+        }
         if (month) params.append('month', month);
         if (year) params.append('year', year);
+        
         const query = params.toString();
         if (query) url += `?${query}`;
+        
         return api.get(url);
     },
     getMonthlyRevenue(month, year) {
