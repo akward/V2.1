@@ -1,3 +1,26 @@
+<!-- Mobile Menu Toggle -->
+<button class="mobile-toggle" onclick="toggleSidebar()">
+    <i class="bi bi-list"></i>
+</button>
+
+<script>
+// Toggle sidebar for mobile
+function toggleSidebar() {
+    document.querySelector('.sidebar').classList.toggle('open');
+}
+
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', function(event) {
+    const sidebar = document.querySelector('.sidebar');
+    const toggle = document.querySelector('.mobile-toggle');
+    if (window.innerWidth <= 768) {
+        if (!sidebar.contains(event.target) && !toggle.contains(event.target)) {
+            sidebar.classList.remove('open');
+        }
+    }
+});
+</script>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
