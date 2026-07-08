@@ -810,3 +810,23 @@ input, select, textarea, button {
     color: var(--text-secondary);
     font-size: 13px;
 }
+
+/* ===== Print Styles ===== */
+@media print {
+    .sidebar, .mobile-toggle, .btn, .no-print {
+        display: none !important;
+    }
+    .main-content {
+        margin: 0 !important;
+        padding: 10px !important;
+    }
+    .stat-card, .card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        break-inside: avoid;
+    }
+    .receipt-box {
+        border: 1px solid #333 !important;
+        background: white !important;
+    }
+}
