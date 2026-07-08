@@ -1,3 +1,15 @@
+// Touch-friendly product selection (untuk mobile)
+document.addEventListener('touchstart', function(e) {
+    const productCard = e.target.closest('.product-card');
+    if (productCard) {
+        productCard.style.transition = 'transform 0.15s';
+        productCard.style.transform = 'scale(0.97)';
+        setTimeout(() => {
+            productCard.style.transform = '';
+        }, 150);
+    }
+}, { passive: true });
+
 // Check authentication
 const user = checkAuth();
 if (user && user.role !== 'owner') {
