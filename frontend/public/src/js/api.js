@@ -1,12 +1,41 @@
-// Gunakan relative path atau absolute path
+// ===== API Configuration =====
 const API_URL = window.location.origin + '/api';
 
 console.log('🌐 API URL:', API_URL);
 
-// Get token from localStorage
+// ===== Loading Indicator =====
+let loadingCount = 0;
+let loadingTimeout = null;
+
+function showLoading() {
+    loadingCount++;
+    const el = document.getElementById('loadingIndicator');
+    if (el) {
+        clearTimeout(loadingTimeout);
+        loadingTimeout = setTimeout(() => {
+            if (loadingCount > 0) {
+                el.style.display = 'block';
+            }
+        }, 300);
+    }
+}
+
+function hideLoading() {
+    loadingCount--;
+    if (loadingCount <= 0) {
+        loadingCount = 0;
+        clearTimeout(loadingTimeout);
+        const el = document.getElementById('loadingIndicator');
+        if (el) {
+            el.style.display = 'none';
+        }
+    }
+}
+
+// ===== Get Token =====
 const getToken = () => localStorage.getItem('token');
 
-// API helper
+// ===== API Helper =====
 const api = {
     async request(endpoint, options = {}) {
         const url = `${API_URL}${endpoint}`;
@@ -27,11 +56,12 @@ const api = {
 
         console.log('📤 Request:', { url, method: options.method || 'GET' });
 
+        showLoading();
+
         try {
             const response = await fetch(url, config);
             console.log('📥 Response status:', response.status);
             
-            // Handle non-JSON responses
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
                 const text = await response.text();
@@ -50,6 +80,8 @@ const api = {
         } catch (error) {
             console.error('❌ API Error:', error);
             throw error;
+        } finally {
+            hideLoading();
         }
     },
 
@@ -78,9 +110,7 @@ const api = {
     }
 };
 
-// ... rest of the code remains the same
-
-// Auth API
+// ===== Auth API =====
 const authAPI = {
     login(email, password) {
         return api.post('/auth/login', { email, password });
@@ -90,7 +120,7 @@ const authAPI = {
     }
 };
 
-// User API
+// ===== User API =====
 const userAPI = {
     addUser(email, name, password, role) {
         return api.post('/users', { email, name, password, role });
@@ -103,7 +133,7 @@ const userAPI = {
     }
 };
 
-// Product API
+// ===== Product API =====
 const productAPI = {
     getProducts() {
         return api.get('/products');
@@ -116,7 +146,7 @@ const productAPI = {
     }
 };
 
-// Transaction API
+// ===== Transaction API =====
 const transactionAPI = {
     getTransactions() {
         return api.get('/transactions');
@@ -126,23 +156,16 @@ const transactionAPI = {
     }
 };
 
-// Commission API
+// ===== Commission API =====
 const commissionAPI = {
     getCommissions(sellerId, month, year) {
         let url = '/commissions';
         const params = new URLSearchParams();
-        
-        // Hanya kirim sellerId jika ada dan user adalah owner
-        // Tapi biarkan server yang menentukan berdasarkan role
-        if (sellerId) {
-            params.append('sellerId', sellerId);
-        }
+        if (sellerId) params.append('sellerId', sellerId);
         if (month) params.append('month', month);
         if (year) params.append('year', year);
-        
         const query = params.toString();
         if (query) url += `?${query}`;
-        
         return api.get(url);
     },
     getMonthlyRevenue(month, year) {
@@ -150,7 +173,8 @@ const commissionAPI = {
     }
 };
 
-// Export all APIs
+// ===== EXPORT ke window =====
+// Pastikan semua API tergabung dalam satu object
 window.api = {
     auth: authAPI,
     user: userAPI,
@@ -160,31 +184,4 @@ window.api = {
 };
 
 console.log('✅ API loaded successfully');
-
-// Loading indicator
-let loadingCount = 0;
-
-function showLoading() {
-    loadingCount++;
-    const el = document.getElementById('loadingIndicator');
-    if (el) el.style.display = 'block';
-}
-
-function hideLoading() {
-    loadingCount--;
-    if (loadingCount <= 0) {
-        loadingCount = 0;
-        const el = document.getElementById('loadingIndicator');
-        if (el) el.style.display = 'none';
-    }
-}
-
-// Tambahkan di setiap request
-async request(endpoint, options = {}) {
-    showLoading();
-    try {
-        // ... existing code ...
-    } finally {
-        hideLoading();
-    }
-}
+console.log('📦 Available APIs:', Object.keys(window.api));
