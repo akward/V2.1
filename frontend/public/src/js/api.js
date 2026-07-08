@@ -160,3 +160,31 @@ window.api = {
 };
 
 console.log('✅ API loaded successfully');
+
+// Loading indicator
+let loadingCount = 0;
+
+function showLoading() {
+    loadingCount++;
+    const el = document.getElementById('loadingIndicator');
+    if (el) el.style.display = 'block';
+}
+
+function hideLoading() {
+    loadingCount--;
+    if (loadingCount <= 0) {
+        loadingCount = 0;
+        const el = document.getElementById('loadingIndicator');
+        if (el) el.style.display = 'none';
+    }
+}
+
+// Tambahkan di setiap request
+async request(endpoint, options = {}) {
+    showLoading();
+    try {
+        // ... existing code ...
+    } finally {
+        hideLoading();
+    }
+}
