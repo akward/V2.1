@@ -28,6 +28,7 @@ document.querySelectorAll('.sidebar .nav-link').forEach(link => {
 // Load dashboard
 async function loadDashboard() {
     try {
+        // Get transactions
         const transactions = await window.api.transaction.getTransactions();
         const totalSales = transactions.transactions.length;
         const totalRevenue = transactions.transactions.reduce((sum, t) => sum + t.total_price, 0);
@@ -35,10 +36,36 @@ async function loadDashboard() {
         document.getElementById('mySales').textContent = totalSales;
         document.getElementById('myRevenue').textContent = `Rp ${totalRevenue.toLocaleString()}`;
         
-        // Get commission
-        const commissions = await window.api.commission.getCommissions(user.id);
-        const totalCommission = commissions.commissions.reduce((sum, c) => sum + c.amount, 0);
-        document.getElementById('myCommission').textContent = `Rp ${totalCommission.toLocaleString()}`;
+        // Get commission - tanpa sellerId (server akan otomatis filter berdasarkan user)
+        try {
+            const commissions = await window.api.commission.getCommissions();
+            const totalCommission = commissions.commissions.reduce((sum, c) => sum + c.amount, 0);
+            document.getElementById('myCommission').textContent = `Rp ${totalCommission.toLocaleString()}`;
+        } catch (commissionError) {
+            console.warn('⚠️ Could not load commissions:', commissionError.message);
+            document.getElementById('myCommission').textContent = 'Rp 0';
+        }
+        
+        // Get recent transactions
+        const recentTransactions = transactions.transactions.slice(0, 5);
+        const tbody = document.getElementById('recentTransactionsBody');
+        tbody.innerHTML = '';
+        
+        if (recentTransactions.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No transactions yet</td></tr>';
+            return;
+        }
+        
+        recentTransactions.forEach(t => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${t.products?.name || 'Unknown'}</td>
+                <td>${t.quantity}</td>
+                <td>Rp ${t.total_price.toLocaleString()}</td>
+                <td>${new Date(t.created_at).toLocaleDateString()}</td>
+            `;
+            tbody.appendChild(tr);
+        });
     } catch (error) {
         console.error('Error loading dashboard:', error);
     }
