@@ -1,8 +1,53 @@
 const supabase = require('../config/supabase');
 
+const getUsersByRole = async (req, res) => {
+    try {
+        const { role } = req.params;
+
+        console.log('📊 Getting users with role:', role);
+
+        if (!['owner', 'admin', 'seller'].includes(role)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid role. Must be owner, admin, or seller'
+            });
+        }
+
+        // Query dengan error handling yang lebih baik
+        const { data: users, error } = await supabase
+            .from('users')
+            .select('id, name, email, role, created_at')
+            .eq('role', role)
+            .order('name');
+
+        if (error) {
+            console.error('❌ Supabase error:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Database error: ' + error.message
+            });
+        }
+
+        console.log('✅ Users found:', users?.length || 0);
+
+        res.json({
+            success: true,
+            users: users || []
+        });
+    } catch (error) {
+        console.error('❌ Get users error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error: ' + error.message
+        });
+    }
+};
+
 const addUser = async (req, res) => {
     try {
         const { email, name, password, role } = req.body;
+
+        console.log('📊 Adding user:', { email, name, role });
 
         if (!email || !name || !password || !role) {
             return res.status(400).json({
@@ -38,15 +83,21 @@ const addUser = async (req, res) => {
             .insert({
                 email,
                 name,
-                password_hash: password, // In production, hash this
+                password_hash: password,
                 role
             })
             .select()
             .single();
 
         if (error) {
-            throw error;
+            console.error('❌ Insert error:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Database error: ' + error.message
+            });
         }
+
+        console.log('✅ User created:', user.id);
 
         res.status(201).json({
             success: true,
@@ -59,42 +110,10 @@ const addUser = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Add user error:', error);
+        console.error('❌ Add user error:', error);
         res.status(500).json({
             success: false,
-            message: 'Internal server error'
-        });
-    }
-};
-
-const getUsersByRole = async (req, res) => {
-    try {
-        const { role } = req.params;
-
-        if (!['owner', 'admin', 'seller'].includes(role)) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid role'
-            });
-        }
-
-        const { data: users, error } = await supabase
-            .from('users')
-            .select('id, name, email, role, created_at')
-            .eq('role', role)
-            .order('name');
-
-        if (error) throw error;
-
-        res.json({
-            success: true,
-            users
-        });
-    } catch (error) {
-        console.error('Get users error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error'
+            message: 'Internal server error: ' + error.message
         });
     }
 };
