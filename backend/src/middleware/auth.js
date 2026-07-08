@@ -12,7 +12,7 @@ const authenticateToken = (req, res, next) => {
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret-key');
         req.user = decoded;
         next();
     } catch (error) {
